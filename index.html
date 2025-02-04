@@ -237,6 +237,29 @@
         .index-item[data-status="draft"] { background-color: #f8d7da; }
         .index-item[data-status="in-progress"] { background-color: #fff3cd; }
         .index-item[data-status="completed"] { background-color: #d4edda; }
+        .scroll-buttons {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .scroll-buttons button {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            transition: all 0.3s ease;
+        }
+        .scroll-buttons button:hover {
+            background-color: #2980b9;
+        }
     </style>
 </head>
 <body>
@@ -247,7 +270,7 @@
         <button class="tab-button" data-grade="3">3학년</button>
     </div>
     <div class="button-container">
-        <button id="addBlock">+ 과목 추가</button>
+        <button id="addBlock">+추가</button>
         <button id="indexShortcut">🔖 인덱스 바로가기</button>
         <button id="downloadData">백업</button>
         <button id="uploadData">백업 파일 업로드</button>
@@ -261,11 +284,23 @@
         <h2>과목 인덱스</h2>
         <div class="index-list" id="indexList"></div>
     </div>
-    <div class="footer"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fkimsj5025.github.io%2Fsetuksaver%2F&count_bg=%2394BC75&title_bg=%23555555&icon=&icon_color=%23000000&title=%EB%B0%A9%EB%AC%B8%EC%9E%90+%EC%88%98&edge_flat=true"/><br>made by kimCastleOwner</div>
-    <div style="position: fixed; bottom: 20px; right: 20px;">
-        <h1><a href="#header", id="top">⬆️</a></h1>
+    <div class="scroll-buttons">
+        <button id="scrollTop">▲</button>
+        <button id="scrollBottom">▼</button>
     </div>
+    <div class="footer"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fkimsj5025.github.io%2Fsetuksaver%2F&count_bg=%2394BC75&title_bg=%23555555&icon=&icon_color=%23000000&title=%EB%B0%A9%EB%AC%B8%EC%9E%90+%EC%88%98&edge_flat=true"/><br>made by kimCastleOwner</div>
+
     <script>
+        // 스크롤 버튼 기능 추가
+        document.getElementById('scrollTop').addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        document.getElementById('scrollBottom').addEventListener('click', () => {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        });
+
+        // 기존 기능들
         let currentGrade = '1';
         const gradeData = {
             '1': [],
@@ -452,10 +487,6 @@
         document.getElementById("indexShortcut").addEventListener("click", () => {
             document.querySelector('.index-container').scrollIntoView({ behavior: 'smooth' });
         });
-        document.getElementById("top").addEventListener("click", () => {
-            document.querySelector('body > h1').scrollIntoView({ behavior: 'smooth' });
-        });
-        
 
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
@@ -503,4 +534,3 @@
         }
     </script>
 </body>
-</html>
