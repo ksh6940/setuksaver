@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="https://littledeep.com/wp-content/uploads/2019/04/littledeep_illustration_book_style2.png">
+    <link rel="icon" type="image/png" href="/setuksaver/icon.png">
     <title>세특정</title>
     <style>
         body {
@@ -35,9 +35,6 @@
             border: none;
             border-radius: 8px;
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
         .tab-button.active {
             background-color: #3498db;
@@ -45,10 +42,6 @@
         }
         .tab-button:hover {
             background-color: #ced4da;
-        }
-        .tab-button img {
-            width: 20px;
-            height: 20px;
         }
         .button-container {
             display: flex;
@@ -238,27 +231,24 @@
             background: #e9ecef;
             border-radius: 8px;
             font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
+        .index-item[data-status="draft"] { background-color: #f8d7da; }
+        .index-item[data-status="in-progress"] { background-color: #fff3cd; }
+        .index-item[data-status="completed"] { background-color: #d4edda; }
     </style>
 </head>
 <body>
     <h1>세부능력및 특기사항 정리 📝</h1>
     <div class="tab-container">
-        <button class="tab-button active" data-grade="1">
-            <img src="/setuksaver/icon/grade1.png" alt="1학년 아이콘">
-            1학년
-        </button>
-        <button class="tab-button" data-grade="2">
-            <img src="/setuksaver/icon/grade2.png" alt="2학년 아이콘">
-            2학년
-        </button>
-        <button class="tab-button" data-grade="3">
-            <img src="/setuksaver/icon/grade3.png" alt="3학년 아이콘">
-            3학년
-        </button>
+        <button class="tab-button active" data-grade="1">1학년</button>
+        <button class="tab-button" data-grade="2">2학년</button>
+        <button class="tab-button" data-grade="3">3학년</button>
     </div>
     <div class="button-container">
-        <button id="addBlock">+추가</button>
+        <button id="addBlock">+ 과목 추가</button>
+        <button id="indexShortcut">🔖 인덱스 바로가기</button>
         <button id="downloadData">백업</button>
         <button id="uploadData">백업 파일 업로드</button>
     </div>
@@ -426,26 +416,40 @@
             updateIndex();
         }
 
+        function createIndexItem(title, status) {
+            const item = document.createElement("div");
+            item.classList.add("index-item");
+            item.dataset.status = status;
+            item.textContent = title;
+            item.addEventListener('click', () => {
+                const targetBlock = Array.from(document.querySelectorAll('.title-input'))
+                    .find(input => input.value === title)
+                    ?.closest('.block');
+                if (targetBlock) {
+                    targetBlock.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+            return item;
+        }
+
         function updateIndex() {
             const indexList = document.getElementById("indexList");
             indexList.innerHTML = '';
-            const titles = [];
-            document.querySelectorAll(".title-input").forEach(input => {
-                if (input.value.trim() !== "") {
-                    titles.push(input.value);
+            document.querySelectorAll(".block").forEach(block => {
+                const title = block.querySelector(".title-input").value.trim();
+                if (title) {
+                    const status = block.dataset.status;
+                    indexList.appendChild(createIndexItem(title, status));
                 }
-            });
-            titles.forEach(title => {
-                const item = document.createElement("div");
-                item.classList.add("index-item");
-                item.textContent = title;
-                indexList.appendChild(item);
             });
         }
 
         document.getElementById("addBlock").addEventListener("click", () => addBlock());
         document.getElementById("downloadData").addEventListener("click", downloadData);
         document.getElementById("uploadData").addEventListener("click", () => document.getElementById('fileInput').click());
+        document.getElementById("indexShortcut").addEventListener("click", () => {
+            document.querySelector('.index-container').scrollIntoView({ behavior: 'smooth' });
+        });
 
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
