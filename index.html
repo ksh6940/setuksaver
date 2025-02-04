@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <link rel="icon" href="https://littledeep.com/wp-content/uploads/2019/04/littledeep_illustration_book_style2.png"/>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="https://littledeep.com/wp-content/uploads/2019/04/littledeep_illustration_book_style2.png">
     <title>세특정</title>
     <style>
         body {
@@ -11,9 +11,9 @@
             background: #f8f9fa;
             margin: 0;
             padding: 20px;
-            min-height: 200vh; /* 세로 사이즈 두 배로 늘림 */
+            min-height: 100vh;
             position: relative;
-            font-size: 20px; /* 폰트 크기 고정 */
+            font-size: 20px;
         }
         h1 {
             font-size: 32px;
@@ -29,7 +29,7 @@
         }
         .tab-button {
             padding: 12px 24px;
-            font-size: 20px; /* 폰트 크기 고정 */
+            font-size: 20px;
             cursor: pointer;
             background-color: #e9ecef;
             border: none;
@@ -51,7 +51,7 @@
         }
         .button-container button {
             padding: 12px 24px;
-            font-size: 20px; /* 폰트 크기 고정 */
+            font-size: 20px;
             cursor: pointer;
             background-color: #3498db;
             color: white;
@@ -77,35 +77,77 @@
             border-radius: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             width: 100%;
-            transition: transform 0.3s ease;
+            min-height: 100px;
+            transition: all 0.3s ease;
             position: relative;
         }
-        .block:hover {
-            transform: translateY(-5px);
+        .block[data-status="draft"] { background-color: #f8d7da; }
+        .block[data-status="in-progress"] { background-color: #fff3cd; }
+        .block[data-status="completed"] { background-color: #d4edda; }
+        .block.collapsed {
+            min-height: 60px;
+            padding: 15px;
+        }
+        .block.collapsed .text-area {
+            display: none;
+        }
+        .block.collapsed .byte-count {
+            display: none;
+        }
+        .block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
         }
         .title-input {
             padding: 12px 20px;
-            margin-bottom: 15px;
-            border: 2px solid #e9ecef;
+            border: 2px solid rgba(0,0,0,0.1);
             border-radius: 8px;
-            width: calc(100% - 40px);
+            width: calc(100% - 200px);
             transition: border-color 0.3s ease;
-            font-size: 20px; /* 폰트 크기 고정 */
+            font-size: 20px;
+            background: rgba(255,255,255,0.8);
         }
         .title-input:focus {
             outline: none;
             border-color: #3498db;
         }
+        .status-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .status-button {
+            padding: 8px 16px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        .status-button.draft {
+            background-color: #721c24;
+            color: white;
+        }
+        .status-button.in-progress {
+            background-color: #856404;
+            color: white;
+        }
+        .status-button.completed {
+            background-color: #155724;
+            color: white;
+        }
         .text-area {
             padding: 15px 20px;
-            border: 2px solid #e9ecef;
+            border: 2px solid rgba(0,0,0,0.1);
             border-radius: 8px;
             width: calc(100% - 40px);
-            min-height: 300px;
+            min-height: 350px;
             resize: vertical;
-            transition: border-color 0.3s ease;
+            transition: all 0.3s ease;
             overflow: hidden;
-            font-size: 20px; /* 폰트 크기 고정 */
+            font-size: 20px;
+            background: rgba(255,255,255,0.8);
         }
         .text-area:focus {
             outline: none;
@@ -115,7 +157,33 @@
             color: #7f8c8d;
             margin-top: 10px;
             text-align: right;
-            font-size: 18px; /* 폰트 크기 고정 */
+            font-size: 18px;
+        }
+        .block-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .delete-button, .collapse-button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .collapse-button {
+            background-color: #3498db;
+        }
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
+        .collapse-button:hover {
+            background-color: #2980b9;
         }
         .save-status {
             font-size: 16px;
@@ -130,59 +198,12 @@
             text-align: center;
             margin: 10px 0;
         }
-        .visitor-counter {
-            font-size: 14px;
-            color: #666;
-            text-align: center;
-            margin: 10px 0;
-        }
         .footer {
             font-size: 14px;
             color: #666;
             text-align: center;
             margin-top: 30px;
             padding-bottom: 20px;
-        }
-        .delete-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 16px; /* 폰트 크기 고정 */
-        }
-        .delete-button:hover {
-            background-color: #c0392b;
-        }
-        .grade-1 {
-            background-color: #f8d7da;
-        }
-        .grade-2 {
-            background-color: #d4edda;
-        }
-        .grade-3 {
-            background-color: #d1ecf1;
-        }
-        .status-select {
-            margin-bottom: 15px;
-            padding: 8px 12px;
-            font-size: 16px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .status-draft {
-            background-color: #f8d7da;
-        }
-        .status-in-progress {
-            background-color: #fff3cd;
-        }
-        .status-completed {
-            background-color: #d4edda;
         }
     </style>
 </head>
@@ -213,8 +234,6 @@
             '2': [],
             '3': []
         };
-        let todayVisitor = 0;
-        let totalVisitor = 0;
 
         function showSaveStatus(message) {
             const status = document.getElementById('saveStatus');
@@ -228,7 +247,8 @@
                 blocks.push({
                     title: block.querySelector(".title-input").value,
                     text: block.querySelector(".text-area").value,
-                    status: block.querySelector(".status-select").value
+                    status: block.dataset.status,
+                    collapsed: block.classList.contains('collapsed')
                 });
             });
             gradeData[currentGrade] = blocks;
@@ -255,25 +275,17 @@
         function loadGradeBlocks(grade) {
             const container = document.getElementById("container");
             container.innerHTML = '';
-            gradeData[grade].forEach(data => addBlock(data.title, data.text, data.status));
+            gradeData[grade].forEach(data => addBlock(data.title, data.text, data.status, data.collapsed));
         }
 
-        function addBlock(title = "", text = "", status = "초안") {
+        function addBlock(title = "", text = "", status = "draft", collapsed = false) {
             const block = document.createElement("div");
-            block.classList.add("block", `grade-${currentGrade}`);
+            block.classList.add("block");
+            if (collapsed) block.classList.add("collapsed");
+            block.dataset.status = status;
 
-            const statusSelect = document.createElement("select");
-            statusSelect.classList.add("status-select");
-            statusSelect.innerHTML = `
-                <option value="초안">초안</option>
-                <option value="수정중">수정중</option>
-                <option value="완료">완료</option>
-            `;
-            statusSelect.value = status;
-            statusSelect.addEventListener("change", () => {
-                block.className = `block grade-${currentGrade} status-${statusSelect.value}`;
-                saveBlocksToLocalStorage();
-            });
+            const header = document.createElement("div");
+            header.classList.add("block-header");
 
             const titleInput = document.createElement("input");
             titleInput.type = "text";
@@ -281,14 +293,48 @@
             titleInput.classList.add("title-input");
             titleInput.value = title;
 
-            const textArea = document.createElement("textarea");
-            textArea.placeholder = "세특 내용";
-            textArea.classList.add("text-area");
-            textArea.value = text;
+            const statusButtons = document.createElement("div");
+            statusButtons.classList.add("status-buttons");
 
-            const byteCount = document.createElement("div");
-            byteCount.classList.add("byte-count");
-            byteCount.textContent = new Blob([text]).size + " 바이트";
+            const draftButton = document.createElement("button");
+            draftButton.classList.add("status-button", "draft");
+            draftButton.textContent = "초안";
+            draftButton.addEventListener("click", () => {
+                block.dataset.status = "draft";
+                saveBlocksToLocalStorage();
+            });
+
+            const inProgressButton = document.createElement("button");
+            inProgressButton.classList.add("status-button", "in-progress");
+            inProgressButton.textContent = "수정중";
+            inProgressButton.addEventListener("click", () => {
+                block.dataset.status = "in-progress";
+                saveBlocksToLocalStorage();
+            });
+
+            const completedButton = document.createElement("button");
+            completedButton.classList.add("status-button", "completed");
+            completedButton.textContent = "완료";
+            completedButton.addEventListener("click", () => {
+                block.dataset.status = "completed";
+                saveBlocksToLocalStorage();
+            });
+
+            statusButtons.appendChild(draftButton);
+            statusButtons.appendChild(inProgressButton);
+            statusButtons.appendChild(completedButton);
+
+            const actions = document.createElement("div");
+            actions.classList.add("block-actions");
+
+            const collapseButton = document.createElement("button");
+            collapseButton.classList.add("collapse-button");
+            collapseButton.textContent = block.classList.contains('collapsed') ? "펼치기" : "접기";
+            collapseButton.addEventListener("click", () => {
+                block.classList.toggle("collapsed");
+                collapseButton.textContent = block.classList.contains('collapsed') ? "펼치기" : "접기";
+                saveBlocksToLocalStorage();
+            });
 
             const deleteButton = document.createElement("button");
             deleteButton.classList.add("delete-button");
@@ -298,61 +344,35 @@
                 saveBlocksToLocalStorage();
             });
 
+            actions.appendChild(collapseButton);
+            actions.appendChild(deleteButton);
+
+            const textArea = document.createElement("textarea");
+            textArea.placeholder = "세특 내용";
+            textArea.classList.add("text-area");
+            textArea.value = text;
+
+            const byteCount = document.createElement("div");
+            byteCount.classList.add("byte-count");
+            byteCount.textContent = new Blob([text]).size + " bytes";
+
             textArea.addEventListener("input", () => {
-                byteCount.textContent = new Blob([textArea.value]).size + " 바이트";
+                byteCount.textContent = new Blob([textArea.value]).size + " bytes";
                 saveBlocksToLocalStorage();
             });
 
             titleInput.addEventListener("input", saveBlocksToLocalStorage);
 
-            block.appendChild(statusSelect);
-            block.appendChild(titleInput);
+            header.appendChild(titleInput);
+            header.appendChild(statusButtons);
+
+            block.appendChild(actions);
+            block.appendChild(header);
             block.appendChild(textArea);
             block.appendChild(byteCount);
-            block.appendChild(deleteButton);
+            
             document.getElementById("container").appendChild(block);
-
-            // 상태에 따라 색상 적용
-            block.className = `block grade-${currentGrade} status-${statusSelect.value}`;
-        }
-
-        function downloadData() {
-            const dataStr = JSON.stringify(gradeData);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(dataBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'gradeData.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        function uploadData(event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = JSON.parse(e.target.result);
-                Object.assign(gradeData, data);
-                loadGradeBlocks(currentGrade);
-                saveBlocksToLocalStorage();
-            };
-            reader.readAsText(file);
-        }
-
-        function updateVisitorCount() {
-            const today = new Date().toDateString();
-            const lastVisit = localStorage.getItem('lastVisit');
-            if (lastVisit !== today) {
-                todayVisitor = 0;
-                localStorage.setItem('lastVisit', today);
-            }
-            todayVisitor++;
-            totalVisitor = parseInt(localStorage.getItem('totalVisitor') || 0) + 1;
-            localStorage.setItem('totalVisitor', totalVisitor);
-            document.getElementById('todayVisitor').textContent = todayVisitor;
-            document.getElementById('totalVisitor').textContent = totalVisitor;
+            block.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
 
         document.getElementById("addBlock").addEventListener("click", () => addBlock());
@@ -378,8 +398,32 @@
 
         window.onload = () => {
             loadBlocksFromLocalStorage();
-            updateVisitorCount();
         };
+
+        function downloadData() {
+            const dataStr = JSON.stringify(gradeData);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'gradeData.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function uploadData(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = JSON.parse(e.target.result);
+                Object.assign(gradeData, data);
+                loadGradeBlocks(currentGrade);
+                saveBlocksToLocalStorage();
+            };
+            reader.readAsText(file);
+        }
     </script>
 </body>
 </html>
