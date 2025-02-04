@@ -1,1 +1,352 @@
-<!DOCTYPE html> <html lang="ko"> <head>     <meta charset="UTF-8">     <meta name="viewport" content="width=device-width, initial-scale=1.0">     <title>세부능력및 특기사항 정리</title>     <style>         body {             font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;             background: #f8f9fa;             margin: 0;             padding: 20px;             min-height: 100vh;             position: relative;         }         h1 {             font-size: 32px;             color: #2c3e50;             margin-bottom: 30px;             text-align: center;         }         .tab-container {             display: flex;             justify-content: center;             gap: 10px;             margin-bottom: 20px;         }         .tab-button {             padding: 12px 24px;             font-size: 16px;             cursor: pointer;             background-color: #e9ecef;             border: none;             border-radius: 8px;             transition: all 0.3s ease;         }         .tab-button.active {             background-color: #3498db;             color: white;         }         .tab-button:hover {             background-color: #ced4da;         }         .button-container {             display: flex;             justify-content: center;             gap: 10px;             margin-bottom: 20px;         }         .button-container button {             padding: 12px 24px;             font-size: 16px;             cursor: pointer;             background-color: #3498db;             color: white;             border: none;             border-radius: 8px;             transition: all 0.3s ease;         }         .button-container button:hover {             background-color: #2980b9;         }         #container {             display: flex;             flex-direction: column;             align-items: center;             gap: 20px;             max-width: 1200px;             margin: 0 auto;             padding: 20px;         }         .block {             background: white;             padding: 25px;             border-radius: 15px;             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);             width: 100%;             transition: transform 0.3s ease;             position: relative;         }         .block:hover {             transform: translateY(-5px);         }         .title-input {             padding: 12px 20px;             margin-bottom: 15px;             border: 2px solid #e9ecef;             border-radius: 8px;             width: calc(100% - 40px);             transition: border-color 0.3s ease;         }         .title-input:focus {             outline: none;             border-color: #3498db;         }         .text-area {             padding: 15px 20px;             border: 2px solid #e9ecef;             border-radius: 8px;             width: calc(100% - 40px);             min-height: 150px;             resize: vertical;             transition: border-color 0.3s ease;             overflow: hidden;         }         .text-area:focus {             outline: none;             border-color: #3498db;         }         .byte-count {             color: #7f8c8d;             margin-top: 10px;             text-align: right;         }         .font-size-control {             margin: 20px auto;             text-align: center;         }         .font-size-control label {             font-size: 14px;             color: #666;         }         .save-status {             font-size: 14px;             color: #666;             text-align: center;             margin: 10px 0;             height: 20px;         }         .warning-message {             font-size: 12px;             color: #e74c3c;             text-align: center;             margin: 10px 0;         }         .visitor-counter {             font-size: 12px;             color: #666;             text-align: center;             margin: 10px 0;         }         .footer {             font-size: 12px;             color: #666;             text-align: center;             margin-top: 30px;             padding-bottom: 20px;         }         .delete-button {             position: absolute;             top: 10px;             right: 10px;             background-color: #e74c3c;             color: white;             border: none;             border-radius: 5px;             padding: 5px 10px;             cursor: pointer;         }         .delete-button:hover {             background-color: #c0392b;         }         .grade-1 {             background-color: #f8d7da;         }         .grade-2 {             background-color: #d4edda;         }         .grade-3 {             background-color: #d1ecf1;         }     </style> </head> <body>     <h1>세부능력및 특기사항 정리</h1>     <div class="tab-container">         <button class="tab-button active" data-grade="1">1학년</button>         <button class="tab-button" data-grade="2">2학년</button>         <button class="tab-button" data-grade="3">3학년</button>     </div>     <div class="font-size-control">         <label for="fontSizeSlider">글자 크기 조정: </label>         <input type="range" id="fontSizeSlider" min="12" max="24" value="16">     </div>     <div class="button-container">         <button id="addBlock">+ 블럭 추가</button>         <button id="saveData">저장</button>         <button id="downloadData">백업</button>         <button id="uploadData">백업 파일 업로드</button>     </div>     <div id="container"></div>     <div class="warning-message">         데이터는 쿠키에 저장되지만, 만약을 위해 꼭 백업을 하시기 바랍니다.     </div>     <div class="visitor-counter">         <span id="todayVisitor">0</span> | <span id="totalVisitor">0</span>     </div>     <div class="footer">made by kimCastleOwner</div>      <script>         let currentGrade = '1';         const gradeData = {             '1': [],             '2': [],             '3': []         };         let todayVisitor = 0;         let totalVisitor = 0;          function updateFontSize(size) {             document.documentElement.style.setProperty('--font-size', `${size}px`);             document.querySelectorAll('.title-input, .text-area').forEach(el => {                 el.style.fontSize = `${size}px`;             });             document.querySelector('.byte-count').style.fontSize = `${size - 2}px`;         }          function showSaveStatus() {             const status = document.getElementById('saveStatus');             status.textContent = '저장 중...';             setTimeout(() => status.textContent = '', 2000);         }          function saveBlocksToCookie() {             const blocks = [];             document.querySelectorAll(".block").forEach(block => {                 blocks.push({                     title: block.querySelector(".title-input").value,                     text: block.querySelector(".text-area").value                 });             });             gradeData[currentGrade] = blocks;             document.cookie = "gradeData=" + encodeURIComponent(JSON.stringify(gradeData)) + "; max-age=31536000; path=/";             document.cookie = "fontSize=" + document.getElementById('fontSizeSlider').value + "; max-age=31536000; path=/";             document.cookie = "lastGrade=" + currentGrade + "; max-age=31536000; path=/";             showSaveStatus();         }          function loadBlocksFromCookie() {             const cookieValue = document.cookie.split("; ").find(row => row.startsWith("gradeData="));             if (cookieValue) {                 const data = JSON.parse(decodeURIComponent(cookieValue.split("=")[1]));                 Object.assign(gradeData, data);                 loadGradeBlocks(currentGrade);             }             const fontSizeValue = document.cookie.split("; ").find(row => row.startsWith("fontSize="));             if (fontSizeValue) {                 const size = fontSizeValue.split("=")[1];                 document.getElementById('fontSizeSlider').value = size;                 updateFontSize(size);             }             const lastGradeValue = document.cookie.split("; ").find(row => row.startsWith("lastGrade="));             if (lastGradeValue) {                 currentGrade = lastGradeValue.split("=")[1];                 document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));                 document.querySelector(`.tab-button[data-grade="${currentGrade}"]`).classList.add("active");                 loadGradeBlocks(currentGrade);             }         }          function loadGradeBlocks(grade) {             const container = document.getElementById("container");             container.innerHTML = '';             gradeData[grade].forEach(data => addBlock(data.title, data.text));         }          function addBlock(title = "", text = "") {             const block = document.createElement("div");             block.classList.add("block", `grade-${currentGrade}`);              const titleInput = document.createElement("input");             titleInput.type = "text";             titleInput.placeholder = "제목 입력";             titleInput.classList.add("title-input");             titleInput.value = title;              const textArea = document.createElement("textarea");             textArea.placeholder = "내용 입력";             textArea.classList.add("text-area");             textArea.value = text;              const byteCount = document.createElement("div");             byteCount.classList.add("byte-count");             byteCount.textContent = new Blob([text]).size + " 바이트";              const deleteButton = document.createElement("button");             deleteButton.classList.add("delete-button");             deleteButton.textContent = "삭제";             deleteButton.addEventListener("click", () => {                 block.remove();                 saveBlocksToCookie();             });              textArea.addEventListener("input", () => {                 byteCount.textContent = new Blob([textArea.value]).size + " 바이트";             });              block.appendChild(titleInput);             block.appendChild(textArea);             block.appendChild(byteCount);             block.appendChild(deleteButton);             document.getElementById("container").appendChild(block);         }          function downloadData() {             const dataStr = JSON.stringify(gradeData);             const dataBlob = new Blob([dataStr], { type: 'application/json' });             const url = URL.createObjectURL(dataBlob);             const a = document.createElement('a');             a.href = url;             a.download = 'gradeData.json';             document.body.appendChild(a);             a.click();             document.body.removeChild(a);             URL.revokeObjectURL(url);         }          function uploadData(event) {             const file = event.target.files[0];             const reader = new FileReader();             reader.onload = function(e) {                 const data = JSON.parse(e.target.result);                 Object.assign(gradeData, data);                 loadGradeBlocks(currentGrade);                 saveBlocksToCookie();             };             reader.readAsText(file);         }          function updateVisitorCount() {             const today = new Date().toDateString();             const lastVisit = localStorage.getItem('lastVisit');             if (lastVisit !== today) {                 todayVisitor = 0;                 localStorage.setItem('lastVisit', today);             }             todayVisitor++;             totalVisitor = parseInt(localStorage.getItem('totalVisitor') || 0) + 1;             localStorage.setItem('totalVisitor', totalVisitor);             document.getElementById('todayVisitor').textContent = todayVisitor;             document.getElementById('totalVisitor').textContent = totalVisitor;         }          document.getElementById("addBlock").addEventListener("click", () => addBlock());         document.getElementById("saveData").addEventListener("click", saveBlocksToCookie);         document.getElementById("downloadData").addEventListener("click", downloadData);         document.getElementById("uploadData").addEventListener("click", () => document.getElementById('fileInput').click());          const fileInput = document.createElement('input');         fileInput.type = 'file';         fileInput.id = 'fileInput';         fileInput.style.display = 'none';         fileInput.addEventListener('change', uploadData);         document.body.appendChild(fileInput);          document.querySelectorAll(".tab-button").forEach(button => {             button.addEventListener("click", () => {                 document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));                 button.classList.add("active");                 currentGrade = button.dataset.grade;                 loadGradeBlocks(currentGrade);             });         });          document.getElementById('fontSizeSlider').addEventListener('input', (e) => {             updateFontSize(e.target.value);         });          window.onload = () => {             loadBlocksFromCookie();             updateVisitorCount();         };     </script> </body> </html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>세부능력및 특기사항 정리</title>
+    <style>
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            min-height: 200vh; /* 세로 사이즈 두 배로 늘림 */
+            position: relative;
+            font-size: 20px; /* 폰트 크기 고정 */
+        }
+        h1 {
+            font-size: 32px;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab-button {
+            padding: 12px 24px;
+            font-size: 20px; /* 폰트 크기 고정 */
+            cursor: pointer;
+            background-color: #e9ecef;
+            border: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .tab-button:hover {
+            background-color: #ced4da;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .button-container button {
+            padding: 12px 24px;
+            font-size: 20px; /* 폰트 크기 고정 */
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .button-container button:hover {
+            background-color: #2980b9;
+        }
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .block {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+        .block:hover {
+            transform: translateY(-5px);
+        }
+        .title-input {
+            padding: 12px 20px;
+            margin-bottom: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            width: calc(100% - 40px);
+            transition: border-color 0.3s ease;
+            font-size: 20px; /* 폰트 크기 고정 */
+        }
+        .title-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .text-area {
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            width: calc(100% - 40px);
+            min-height: 150px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+            overflow: hidden;
+            font-size: 20px; /* 폰트 크기 고정 */
+        }
+        .text-area:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .byte-count {
+            color: #7f8c8d;
+            margin-top: 10px;
+            text-align: right;
+            font-size: 18px; /* 폰트 크기 고정 */
+        }
+        .save-status {
+            font-size: 16px;
+            color: #666;
+            text-align: center;
+            margin: 10px 0;
+            height: 20px;
+        }
+        .warning-message {
+            font-size: 14px;
+            color: #e74c3c;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .visitor-counter {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .footer {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-top: 30px;
+            padding-bottom: 20px;
+        }
+        .delete-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 16px; /* 폰트 크기 고정 */
+        }
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
+        .grade-1 {
+            background-color: #f8d7da;
+        }
+        .grade-2 {
+            background-color: #d4edda;
+        }
+        .grade-3 {
+            background-color: #d1ecf1;
+        }
+    </style>
+</head>
+<body>
+    <h1>세부능력및 특기사항 정리</h1>
+    <div class="tab-container">
+        <button class="tab-button active" data-grade="1">1학년</button>
+        <button class="tab-button" data-grade="2">2학년</button>
+        <button class="tab-button" data-grade="3">3학년</button>
+    </div>
+    <div class="button-container">
+        <button id="addBlock">+ 블럭 추가</button>
+        <button id="saveData">저장</button>
+        <button id="downloadData">백업</button>
+        <button id="uploadData">백업 파일 업로드</button>
+    </div>
+    <div class="save-status" id="saveStatus"></div>
+    <div class="warning-message">
+        데이터는 브라우저에 저장되지만, 만약을 위해 꼭 백업을 하시기 바랍니다.
+    </div>
+    <div class="visitor-counter">
+        <span id="todayVisitor">0</span> | <span id="totalVisitor">0</span>
+    </div>
+    <div id="container"></div>
+    <div class="footer">made by kimCastleOwner</div>
+
+    <script>
+        let currentGrade = '1';
+        const gradeData = {
+            '1': [],
+            '2': [],
+            '3': []
+        };
+        let todayVisitor = 0;
+        let totalVisitor = 0;
+
+        function showSaveStatus(message) {
+            const status = document.getElementById('saveStatus');
+            status.textContent = message;
+            setTimeout(() => status.textContent = '', 2000);
+        }
+
+        function saveBlocksToLocalStorage() {
+            const blocks = [];
+            document.querySelectorAll(".block").forEach(block => {
+                blocks.push({
+                    title: block.querySelector(".title-input").value,
+                    text: block.querySelector(".text-area").value
+                });
+            });
+            gradeData[currentGrade] = blocks;
+            localStorage.setItem("gradeData", JSON.stringify(gradeData));
+            localStorage.setItem("lastGrade", currentGrade);
+            showSaveStatus('저장 완료!');
+        }
+
+        function loadBlocksFromLocalStorage() {
+            const data = localStorage.getItem("gradeData");
+            if (data) {
+                Object.assign(gradeData, JSON.parse(data));
+                loadGradeBlocks(currentGrade);
+            }
+            const lastGrade = localStorage.getItem("lastGrade");
+            if (lastGrade) {
+                currentGrade = lastGrade;
+                document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+                document.querySelector(`.tab-button[data-grade="${currentGrade}"]`).classList.add("active");
+                loadGradeBlocks(currentGrade);
+            }
+        }
+
+        function loadGradeBlocks(grade) {
+            const container = document.getElementById("container");
+            container.innerHTML = '';
+            gradeData[grade].forEach(data => addBlock(data.title, data.text));
+        }
+
+        function addBlock(title = "", text = "") {
+            const block = document.createElement("div");
+            block.classList.add("block", `grade-${currentGrade}`);
+
+            const titleInput = document.createElement("input");
+            titleInput.type = "text";
+            titleInput.placeholder = "제목 입력";
+            titleInput.classList.add("title-input");
+            titleInput.value = title;
+
+            const textArea = document.createElement("textarea");
+            textArea.placeholder = "내용 입력";
+            textArea.classList.add("text-area");
+            textArea.value = text;
+
+            const byteCount = document.createElement("div");
+            byteCount.classList.add("byte-count");
+            byteCount.textContent = new Blob([text]).size + " 바이트";
+
+            const deleteButton = document.createElement("button");
+            deleteButton.classList.add("delete-button");
+            deleteButton.textContent = "삭제";
+            deleteButton.addEventListener("click", () => {
+                block.remove();
+                saveBlocksToLocalStorage();
+            });
+
+            textArea.addEventListener("input", () => {
+                byteCount.textContent = new Blob([textArea.value]).size + " 바이트";
+                saveBlocksToLocalStorage();
+            });
+
+            titleInput.addEventListener("input", saveBlocksToLocalStorage);
+
+            block.appendChild(titleInput);
+            block.appendChild(textArea);
+            block.appendChild(byteCount);
+            block.appendChild(deleteButton);
+            document.getElementById("container").appendChild(block);
+        }
+
+        function downloadData() {
+            const dataStr = JSON.stringify(gradeData);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'gradeData.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function uploadData(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = JSON.parse(e.target.result);
+                Object.assign(gradeData, data);
+                loadGradeBlocks(currentGrade);
+                saveBlocksToLocalStorage();
+            };
+            reader.readAsText(file);
+        }
+
+        function updateVisitorCount() {
+            const today = new Date().toDateString();
+            const lastVisit = localStorage.getItem('lastVisit');
+            if (lastVisit !== today) {
+                todayVisitor = 0;
+                localStorage.setItem('lastVisit', today);
+            }
+            todayVisitor++;
+            totalVisitor = parseInt(localStorage.getItem('totalVisitor') || 0) + 1;
+            localStorage.setItem('totalVisitor', totalVisitor);
+            document.getElementById('todayVisitor').textContent = todayVisitor;
+            document.getElementById('totalVisitor').textContent = totalVisitor;
+        }
+
+        document.getElementById("addBlock").addEventListener("click", () => addBlock());
+        document.getElementById("saveData").addEventListener("click", saveBlocksToLocalStorage);
+        document.getElementById("downloadData").addEventListener("click", downloadData);
+        document.getElementById("uploadData").addEventListener("click", () => document.getElementById('fileInput').click());
+
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.id = 'fileInput';
+        fileInput.style.display = 'none';
+        fileInput.addEventListener('change', uploadData);
+        document.body.appendChild(fileInput);
+
+        document.querySelectorAll(".tab-button").forEach(button => {
+            button.addEventListener("click", () => {
+                document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+                button.classList.add("active");
+                currentGrade = button.dataset.grade;
+                loadGradeBlocks(currentGrade);
+            });
+        });
+
+        window.onload = () => {
+            loadBlocksFromLocalStorage();
+            updateVisitorCount();
+        };
+    </script>
+</body>
+</html>
