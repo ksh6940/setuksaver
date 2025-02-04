@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link type="image/png" href="/setuksaver/littledeep_illustration_book_style2.png">
-    <link type="apple-touch-icon" href="/setuksaver/littledeep_illustration_book_style2.png">
+    <link rel="icon" type="image/png" href="https://littledeep.com/wp-content/uploads/2019/04/littledeep_illustration_book_style2.png">
     <title>세특정</title>
     <style>
         body {
@@ -51,7 +50,7 @@
             margin-bottom: 20px;
         }
         .button-container button {
-            padding: 6px 12px;
+            padding: 6px 6px;
             font-size: 20px;
             cursor: pointer;
             background-color: #3498db;
@@ -117,6 +116,7 @@
         .status-buttons {
             display: flex;
             gap: 10px;
+            margin-right: 120px; /* 상태 버튼과 액션 버튼 간격 조정 */
         }
         .status-button {
             padding: 8px 30px;
@@ -341,8 +341,10 @@
             deleteButton.classList.add("delete-button");
             deleteButton.textContent = "삭제";
             deleteButton.addEventListener("click", () => {
-                block.remove();
-                saveBlocksToLocalStorage();
+                if (confirm("정말 삭제하시겠습니까?")) {
+                    block.remove();
+                    saveBlocksToLocalStorage();
+                }
             });
 
             actions.appendChild(collapseButton);
