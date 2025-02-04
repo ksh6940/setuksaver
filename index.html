@@ -35,6 +35,9 @@
             border: none;
             border-radius: 8px;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         .tab-button.active {
             background-color: #3498db;
@@ -42,6 +45,10 @@
         }
         .tab-button:hover {
             background-color: #ced4da;
+        }
+        .tab-button img {
+            width: 20px;
+            height: 20px;
         }
         .button-container {
             display: flex;
@@ -117,7 +124,7 @@
             padding: 8px 30px;
             display: flex;
             gap: 10px;
-            margin-right: 100px; /* 상태 버튼과 액션 버튼 간격 조정 */
+            margin-right: 100px;
         }
         .status-button {
             padding: 8px 30px;
@@ -132,8 +139,8 @@
             color: white;
         }
         .status-button.in-progress {
-            background-color: #d9c915;
-            color: white;
+            background-color: #ffec1d;
+            color: rgb(0, 0, 0);
         }
         .status-button.completed {
             background-color: #07b730;
@@ -207,18 +214,51 @@
             margin-top: 30px;
             padding-bottom: 20px;
         }
+        .index-container {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .index-container h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        .index-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .index-item {
+            padding: 8px 16px;
+            background: #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
     <h1>세부능력및 특기사항 정리 📝</h1>
     <div class="tab-container">
-        <button class="tab-button active" data-grade="1">1학년</button>
-        <button class="tab-button" data-grade="2">2학년</button>
-        <button class="tab-button" data-grade="3">3학년</button>
+        <button class="tab-button active" data-grade="1">
+            <img src="/setuksaver/icon/grade1.png" alt="1학년 아이콘">
+            1학년
+        </button>
+        <button class="tab-button" data-grade="2">
+            <img src="/setuksaver/icon/grade2.png" alt="2학년 아이콘">
+            2학년
+        </button>
+        <button class="tab-button" data-grade="3">
+            <img src="/setuksaver/icon/grade3.png" alt="3학년 아이콘">
+            3학년
+        </button>
     </div>
     <div class="button-container">
         <button id="addBlock">+추가</button>
-        <button id="saveData">저장</button>
         <button id="downloadData">백업</button>
         <button id="uploadData">백업 파일 업로드</button>
     </div>
@@ -227,6 +267,10 @@
         데이터는 브라우저에 저장되지만, 만약을 위해 꼭 백업을 하시기 바랍니다.
     </div>
     <div id="container"></div>
+    <div class="index-container">
+        <h2>과목 인덱스</h2>
+        <div class="index-list" id="indexList"></div>
+    </div>
     <div class="footer"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fkimsj5025.github.io%2Fsetuksaver%2F&count_bg=%2394BC75&title_bg=%23555555&icon=&icon_color=%23000000&title=%EB%B0%A9%EB%AC%B8%EC%9E%90+%EC%88%98&edge_flat=true"/><br>made by kimCastleOwner</div>
 
     <script>
@@ -257,6 +301,7 @@
             localStorage.setItem("gradeData", JSON.stringify(gradeData));
             localStorage.setItem("lastGrade", currentGrade);
             showSaveStatus('저장 완료!');
+            updateIndex();
         }
 
         function loadBlocksFromLocalStorage() {
@@ -278,6 +323,7 @@
             const container = document.getElementById("container");
             container.innerHTML = '';
             gradeData[grade].forEach(data => addBlock(data.title, data.text, data.status, data.collapsed));
+            updateIndex();
         }
 
         function addBlock(title = "", text = "", status = "draft", collapsed = false) {
@@ -377,10 +423,27 @@
             
             document.getElementById("container").appendChild(block);
             block.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            updateIndex();
+        }
+
+        function updateIndex() {
+            const indexList = document.getElementById("indexList");
+            indexList.innerHTML = '';
+            const titles = [];
+            document.querySelectorAll(".title-input").forEach(input => {
+                if (input.value.trim() !== "") {
+                    titles.push(input.value);
+                }
+            });
+            titles.forEach(title => {
+                const item = document.createElement("div");
+                item.classList.add("index-item");
+                item.textContent = title;
+                indexList.appendChild(item);
+            });
         }
 
         document.getElementById("addBlock").addEventListener("click", () => addBlock());
-        document.getElementById("saveData").addEventListener("click", saveBlocksToLocalStorage);
         document.getElementById("downloadData").addEventListener("click", downloadData);
         document.getElementById("uploadData").addEventListener("click", () => document.getElementById('fileInput').click());
 
