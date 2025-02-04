@@ -166,6 +166,23 @@
         .grade-3 {
             background-color: #d1ecf1;
         }
+        .status-select {
+            margin-bottom: 15px;
+            padding: 8px 12px;
+            font-size: 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .status-draft {
+            background-color: #f8d7da;
+        }
+        .status-in-progress {
+            background-color: #fff3cd;
+        }
+        .status-completed {
+            background-color: #d4edda;
+        }
     </style>
 </head>
 <body>
@@ -209,7 +226,8 @@
             document.querySelectorAll(".block").forEach(block => {
                 blocks.push({
                     title: block.querySelector(".title-input").value,
-                    text: block.querySelector(".text-area").value
+                    text: block.querySelector(".text-area").value,
+                    status: block.querySelector(".status-select").value
                 });
             });
             gradeData[currentGrade] = blocks;
@@ -236,12 +254,25 @@
         function loadGradeBlocks(grade) {
             const container = document.getElementById("container");
             container.innerHTML = '';
-            gradeData[grade].forEach(data => addBlock(data.title, data.text));
+            gradeData[grade].forEach(data => addBlock(data.title, data.text, data.status));
         }
 
-        function addBlock(title = "", text = "") {
+        function addBlock(title = "", text = "", status = "초안") {
             const block = document.createElement("div");
             block.classList.add("block", `grade-${currentGrade}`);
+
+            const statusSelect = document.createElement("select");
+            statusSelect.classList.add("status-select");
+            statusSelect.innerHTML = `
+                <option value="초안">초안</option>
+                <option value="수정중">수정중</option>
+                <option value="완료">완료</option>
+            `;
+            statusSelect.value = status;
+            statusSelect.addEventListener("change", () => {
+                block.className = `block grade-${currentGrade} status-${statusSelect.value}`;
+                saveBlocksToLocalStorage();
+            });
 
             const titleInput = document.createElement("input");
             titleInput.type = "text";
@@ -273,11 +304,15 @@
 
             titleInput.addEventListener("input", saveBlocksToLocalStorage);
 
+            block.appendChild(statusSelect);
             block.appendChild(titleInput);
             block.appendChild(textArea);
             block.appendChild(byteCount);
             block.appendChild(deleteButton);
             document.getElementById("container").appendChild(block);
+
+            // 상태에 따라 색상 적용
+            block.className = `block grade-${currentGrade} status-${statusSelect.value}`;
         }
 
         function downloadData() {
