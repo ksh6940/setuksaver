@@ -260,6 +260,17 @@
         .scroll-buttons button:hover {
             background-color: #2980b9;
         }
+        .selection-info {
+            position: fixed;
+            left: 20px;
+            bottom: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -290,6 +301,7 @@
     <div class="warning-message">
         데이터는 브라우저에 저장되지만, 만약을 위해 꼭 백업을 하시기 바랍니다.
     </div>
+    <div class="selection-info" id="selectionInfo">선택한 글자 바이트 수: 0</div>
     <div class="footer"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fkimsj5025.github.io%2Fsetuksaver%2F&count_bg=%2394BC75&title_bg=%23555555&icon=&icon_color=%23000000&title=%EB%B0%A9%EB%AC%B8%EC%9E%90+%EC%88%98&edge_flat=true"/><br>made by kimCastleOwner</div>
 
     <script>
@@ -534,5 +546,18 @@
             };
             reader.readAsText(file);
         }
+        const selectionInfo = document.getElementById('selectionInfo');
+        document.addEventListener('selectionchange', () => {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const selectedText = selection.toString();
+                if (selectedText) {
+                    const charCount = new Blob([selectedText]).size;
+                    selectionInfo.textContent = `선택한 글자 바이트 수: ${charCount}`;
+                } else {
+                    selectionInfo.textContent = '선택한 글자 바이트 수: 0';
+                }
+            }
+        });
     </script>
 </body>
