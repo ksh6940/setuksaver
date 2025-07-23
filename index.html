@@ -4,560 +4,395 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/setuksaver/icon.png">
-    <title>멀글세</title>
+    <title>멀글세 (멀티 글자수 세기)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        /* 기본 폰트 및 커스텀 스타일 */
         body {
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
-            background: #f8f9fa;
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-            position: relative;
-            font-size: 20px;
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
         }
-        h1 {
-            font-size: 32px;
-            color: #2c3e50;
-            margin-bottom: 30px;
-            text-align: center;
+
+        /* data-status 속성에 따른 동적 배경색 변화 */
+        .block[data-status="draft"] { background-color: #fee2e2; /* red-100 */ }
+        .block[data-status="in-progress"] { background-color: #fef9c3; /* yellow-100 */ }
+        .block[data-status="completed"] { background-color: #dcfce7; /* green-100 */ }
+        
+        .index-item[data-status="draft"] { background-color: #fecaca; /* red-200 */ }
+        .index-item[data-status="in-progress"] { background-color: #fef08a; /* yellow-200 */ }
+        .index-item[data-status="completed"] { background-color: #bbf7d0; /* green-200 */ }
+
+        /* 스크롤바 스타일 (선택 사항) */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-        .tab-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
         }
-        .tab-button {
-            padding: 12px 24px;
-            font-size: 20px;
-            cursor: pointer;
-            background-color: #e9ecef;
-            border: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
         }
-        .tab-button.active {
-            background-color: #3498db;
-            color: white;
-        }
-        .tab-button:hover {
-            background-color: #ced4da;
-        }
-        .button-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .button-container button {
-            padding: 6px 6px;
-            font-size: 20px;
-            cursor: pointer;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        .button-container button:hover {
-            background-color: #2980b9;
-        }
-        #container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .block {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            min-height: 100px;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        .block[data-status="draft"] { background-color: #f8d7da; }
-        .block[data-status="in-progress"] { background-color: #fff3cd; }
-        .block[data-status="completed"] { background-color: #d4edda; }
-        .block.collapsed {
-            min-height: 60px;
-            padding: 15px;
-        }
-        .block.collapsed .text-area {
-            display: none;
-        }
-        .block.collapsed .byte-count {
-            display: none;
-        }
-        .block-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .title-input {
-            padding: 12px 20px;
-            border: 2px solid rgba(0,0,0,0.1);
-            border-radius: 8px;
-            width: calc(100% - 200px);
-            transition: border-color 0.3s ease;
-            font-size: 20px;
-            background: rgba(255,255,255,0.8);
-        }
-        .title-input:focus {
-            outline: none;
-            border-color: #3498db;
-        }
-        .status-buttons {
-            padding: 8px 30px;
-            display: flex;
-            gap: 10px;
-            margin-right: 100px;
-        }
-        .status-button {
-            padding: 8px 30px;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-        .status-button.draft {
-            background-color: #ff0019;
-            color: white;
-        }
-        .status-button.in-progress {
-            background-color: #ffec1d;
-            color: rgb(0, 0, 0);
-        }
-        .status-button.completed {
-            background-color: #07b730;
-            color: white;
-        }
-        .text-area {
-            padding: 15px 20px;
-            border: 2px solid rgba(0,0,0,0.1);
-            border-radius: 8px;
-            width: calc(100% - 40px);
-            min-height: 350px;
-            resize: vertical;
-            transition: all 0.3s ease;
-            overflow: hidden;
-            font-size: 20px;
-            background: rgba(255,255,255,0.8);
-        }
-        .text-area:focus {
-            outline: none;
-            border-color: #3498db;
-        }
-        .byte-count {
-            color: #7f8c8d;
-            margin-top: 10px;
-            text-align: right;
-            font-size: 18px;
-        }
-        .block-actions {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            display: flex;
-            gap: 10px;
-        }
-        .delete-button, .collapse-button {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-        .collapse-button {
-            background-color: #3498db;
-        }
-        .delete-button:hover {
-            background-color: #c0392b;
-        }
-        .collapse-button:hover {
-            background-color: #2980b9;
-        }
-        .save-status {
-            font-size: 16px;
-            color: #666;
-            text-align: center;
-            margin: 10px 0;
-            height: 20px;
-        }
-        .warning-message {
-            font-size: 14px;
-            color: #e74c3c;
-            text-align: center;
-            margin: 10px 0;
-        }
-        .footer {
-            font-size: 14px;
-            color: #666;
-            text-align: center;
-            margin-top: 30px;
-            padding-bottom: 20px;
-        }
-        .index-container {
-            margin-top: 20px;
-            padding: 20px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .index-container h2 {
-            font-size: 24px;
-            margin-bottom: 15px;
-        }
-        .index-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .index-item {
-            padding: 8px 16px;
-            background: #e9ecef;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .index-item[data-status="draft"] { background-color: #f8d7da; }
-        .index-item[data-status="in-progress"] { background-color: #fff3cd; }
-        .index-item[data-status="completed"] { background-color: #d4edda; }
-        .scroll-buttons {
-            position: fixed;
-            right: 20px;
-            bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .scroll-buttons button {
-            padding: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            transition: all 0.3s ease;
-        }
-        .scroll-buttons button:hover {
-            background-color: #2980b9;
-        }
-        .selection-info {
-            position: fixed;
-            left: 20px;
-            bottom: 20px;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 14px;
-            z-index: 1000;
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
         }
     </style>
 </head>
-<body>
-    <h1>멀티 글자수 세기 📝</h1>
-    <div class="tab-container">
-        <button class="tab-button active" data-grade="1">1학년</button>
-        <button class="tab-button" data-grade="2">2학년</button>
-        <button class="tab-button" data-grade="3">3학년</button>
+<body class="bg-slate-100 text-slate-800">
+
+    <!-- 주 컨테이너 -->
+    <div class="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <!-- 헤더 -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-slate-900">멀티 글자수 세기 📝</h1>
+            <p class="text-slate-600 mt-2">과목별 세특 내용을 효율적으로 관리하고 글자 수를 확인하세요.</p>
+        </header>
+
+        <!-- 탭 컨테이너 -->
+        <div class="flex justify-center bg-slate-200 rounded-xl p-1 mb-6">
+            <button class="tab-button flex-1 py-2 px-4 rounded-lg text-lg font-semibold transition-colors duration-300" data-grade="1">1학년</button>
+            <button class="tab-button flex-1 py-2 px-4 rounded-lg text-lg font-semibold transition-colors duration-300" data-grade="2">2학년</button>
+            <button class="tab-button flex-1 py-2 px-4 rounded-lg text-lg font-semibold transition-colors duration-300" data-grade="3">3학년</button>
+        </div>
+
+        <!-- 액션 버튼 그룹 -->
+        <div class="flex flex-wrap justify-center gap-4 mb-4">
+            <button id="addBlock" class="flex items-center gap-2 bg-indigo-600 text-white font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                과목 추가
+            </button>
+            <button id="indexShortcut" class="flex items-center gap-2 bg-white text-slate-700 font-semibold py-2 px-5 rounded-lg shadow-md hover:bg-slate-50 transition-all duration-300 border border-slate-300">
+                🔖 인덱스 바로가기
+            </button>
+        </div>
+
+        <!-- 저장 상태 메시지 -->
+        <div class="save-status text-center text-green-600 font-medium h-6 mb-4" id="saveStatus"></div>
+
+        <!-- 블록 컨테이너 -->
+        <div id="container" class="space-y-6"></div>
+
+        <!-- 인덱스 컨테이너 -->
+        <div class="index-container mt-12 p-6 bg-white rounded-2xl shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 text-slate-800">과목 인덱스</h2>
+            <div class="index-list flex flex-wrap gap-3" id="indexList"></div>
+        </div>
+        
+        <!-- 푸터 및 데이터 관리 -->
+        <footer class="text-center mt-12 space-y-4">
+            <div class="flex justify-center gap-4">
+                <button id="downloadData" class="bg-slate-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-slate-800 transition-colors">백업</button>
+                <button id="uploadDataBtn" class="bg-slate-700 text-white font-semibold py-2 px-4 rounded-lg hover:bg-slate-800 transition-colors">백업 파일 업로드</button>
+                <input type="file" id="fileInput" class="hidden">
+            </div>
+            <div class="warning-message text-sm text-red-600 font-medium">
+                데이터는 브라우저에 저장되지만, 만약을 위해 꼭 백업을 하시기 바랍니다.
+            </div>
+             <div class="selection-info fixed left-4 bottom-4 bg-gray-900 bg-opacity-80 text-white text-sm py-2 px-4 rounded-lg shadow-lg z-50" id="selectionInfo">선택한 글자 바이트 수: 0</div>
+            <div class="flex justify-center items-center mt-6">
+                <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fkimsj5025.github.io%2Fsetuksaver%2F&count_bg=%2364748B&title_bg=%23334155&icon=&icon_color=%23E2E8F0&title=%EB%B0%A9%EB%AC%B8%EC%9E%90+%EC%88%98&edge_flat=true"/>
+            </div>
+            <p class="text-slate-500 text-sm">made by kimCastleOwner</p>
+        </footer>
     </div>
-    <div class="button-container">
-        <button id="addBlock">+과목추가</button>
-        <button id="indexShortcut">🔖 인덱스 바로가기</button>
+
+    <!-- 스크롤 버튼 -->
+    <div class="scroll-buttons fixed right-5 bottom-5 z-50 flex flex-col gap-3">
+        <button id="scrollTop" class="w-12 h-12 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center hover:bg-indigo-700 transition-all transform hover:-translate-y-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+        <button id="scrollBottom" class="w-12 h-12 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center hover:bg-indigo-700 transition-all transform hover:translate-y-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+        </button>
     </div>
-    <div class="save-status" id="saveStatus"></div>
-    <div id="container"></div>
-    <div class="index-container">
-        <h2>과목 인덱스</h2>
-        <div class="index-list" id="indexList"></div>
+    
+    <!-- 삭제 확인 모달 -->
+    <div id="deleteModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl p-8 m-4 max-w-sm w-full">
+            <h3 class="text-xl font-bold text-slate-800 mb-4">정말 삭제하시겠습니까?</h3>
+            <p class="text-slate-600 mb-6">이 작업은 되돌릴 수 없습니다.</p>
+            <div class="flex justify-end gap-4">
+                <button id="cancelDelete" class="py-2 px-4 bg-slate-200 text-slate-800 font-semibold rounded-lg hover:bg-slate-300 transition-colors">취소</button>
+                <button id="confirmDelete" class="py-2 px-4 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors">삭제</button>
+            </div>
+        </div>
     </div>
-    <div class="scroll-buttons">
-        <button id="scrollTop">▲</button>
-        <button id="scrollBottom">▼</button>
-    </div>
-    <div class="footer">
-        <button id="downloadData">백업</button>
-        <button id="uploadData">백업 파일 업로드</button>
-    </div>
-    <div class="warning-message">
-        데이터는 브라우저에 저장되지만, 만약을 위해 꼭 백업을 하시기 바랍니다.
-    </div>
-    <div class="selection-info" id="selectionInfo">선택한 글자 바이트 수: 0</div>
-    <div class="footer"><img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fkimsj5025.github.io%2Fsetuksaver%2F&count_bg=%2394BC75&title_bg=%23555555&icon=&icon_color=%23000000&title=%EB%B0%A9%EB%AC%B8%EC%9E%90+%EC%88%98&edge_flat=true"/><br>made by kimCastleOwner</div>
+
 
     <script>
-        // 스크롤 버튼 기능 추가
-        document.getElementById('scrollTop').addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- 전역 변수 및 상태 ---
+            let currentGrade = '1';
+            const gradeData = { '1': [], '2': [], '3': [] };
+            let blockToDelete = null; // 삭제할 블록을 임시 저장
 
-        document.getElementById('scrollBottom').addEventListener('click', () => {
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        });
+            // --- DOM 요소 ---
+            const container = document.getElementById("container");
+            const saveStatusEl = document.getElementById('saveStatus');
+            const indexListEl = document.getElementById("indexList");
+            const selectionInfoEl = document.getElementById('selectionInfo');
+            const deleteModal = document.getElementById('deleteModal');
+            const confirmDeleteBtn = document.getElementById('confirmDelete');
+            const cancelDeleteBtn = document.getElementById('cancelDelete');
 
-        // 기존 기능들
-        let currentGrade = '1';
-        const gradeData = {
-            '1': [],
-            '2': [],
-            '3': []
-        };
+            // --- 함수 정의 ---
 
-        function showSaveStatus(message) {
-            const status = document.getElementById('saveStatus');
-            status.textContent = message;
-            setTimeout(() => status.textContent = '', 1000);
-        }
+            // 저장 상태 메시지 표시
+            function showSaveStatus(message) {
+                saveStatusEl.textContent = message;
+                setTimeout(() => saveStatusEl.textContent = '', 1500);
+            }
 
-        function saveBlocksToLocalStorage() {
-            const blocks = [];
-            document.querySelectorAll(".block").forEach(block => {
-                blocks.push({
-                    title: block.querySelector(".title-input").value,
-                    text: block.querySelector(".text-area").value,
-                    status: block.dataset.status,
-                    collapsed: block.classList.contains('collapsed')
+            // 로컬 스토리지에 데이터 저장
+            function saveBlocksToLocalStorage() {
+                const blocks = [];
+                document.querySelectorAll(".block").forEach(block => {
+                    blocks.push({
+                        title: block.querySelector(".title-input").value,
+                        text: block.querySelector(".text-area").value,
+                        status: block.dataset.status,
+                        collapsed: block.classList.contains('collapsed')
+                    });
+                });
+                gradeData[currentGrade] = blocks;
+                localStorage.setItem("gradeData", JSON.stringify(gradeData));
+                localStorage.setItem("lastGrade", currentGrade);
+                showSaveStatus('자동 저장 완료!');
+                updateIndex();
+            }
+
+            // 로컬 스토리지에서 데이터 불러오기
+            function loadBlocksFromLocalStorage() {
+                const data = localStorage.getItem("gradeData");
+                if (data) {
+                    Object.assign(gradeData, JSON.parse(data));
+                }
+                const lastGrade = localStorage.getItem("lastGrade");
+                if (lastGrade) {
+                    currentGrade = lastGrade;
+                }
+                updateActiveTab();
+                loadGradeBlocks(currentGrade);
+            }
+            
+            // 현재 학년 탭 활성화
+            function updateActiveTab() {
+                document.querySelectorAll(".tab-button").forEach(btn => {
+                    if (btn.dataset.grade === currentGrade) {
+                        btn.classList.add("bg-white", "text-indigo-600", "shadow");
+                        btn.classList.remove("text-slate-700");
+                    } else {
+                        btn.classList.remove("bg-white", "text-indigo-600", "shadow");
+                        btn.classList.add("text-slate-700");
+                    }
+                });
+            }
+
+            // 특정 학년 블록 로드
+            function loadGradeBlocks(grade) {
+                container.innerHTML = '';
+                if (gradeData[grade]) {
+                    gradeData[grade].forEach(data => addBlock(data.title, data.text, data.status, data.collapsed, false));
+                }
+                updateIndex();
+            }
+            
+            // 새 블록 추가
+            function addBlock(title = "", text = "", status = "draft", collapsed = false, shouldScroll = true) {
+                const block = document.createElement("div");
+                block.className = `block p-6 rounded-2xl shadow-lg transition-all duration-300 relative ${collapsed ? 'collapsed' : ''}`;
+                block.dataset.status = status;
+
+                const byteSize = new Blob([text]).size;
+
+                block.innerHTML = `
+                    <div class="block-header flex justify-between items-start mb-4">
+                        <input type="text" placeholder="과목명" class="title-input text-xl font-bold w-full bg-transparent focus:outline-none" value="${title}">
+                        
+                        <div class="flex items-center gap-4 ml-4 flex-shrink-0">
+                            <div class="status-buttons flex items-center gap-2">
+                                <button data-status="draft" class="status-button w-6 h-6 rounded-full bg-red-400 border-2 border-white shadow hover:scale-110 transition-transform" title="초안"></button>
+                                <button data-status="in-progress" class="status-button w-6 h-6 rounded-full bg-yellow-400 border-2 border-white shadow hover:scale-110 transition-transform" title="수정중"></button>
+                                <button data-status="completed" class="status-button w-6 h-6 rounded-full bg-green-400 border-2 border-white shadow hover:scale-110 transition-transform" title="완료"></button>
+                            </div>
+                            <div class="block-actions flex items-center gap-2">
+                                <button class="collapse-button p-2 rounded-full bg-slate-200 hover:bg-slate-300 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}">
+                                        <polyline points="18 15 12 9 6 15"></polyline>
+                                    </svg>
+                                </button>
+                                <button class="delete-button p-2 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="content-wrapper overflow-hidden transition-all duration-500 ease-in-out ${collapsed ? 'max-h-0' : 'max-h-screen'}">
+                        <textarea placeholder="세특 내용" class="text-area w-full h-48 p-4 bg-white/50 rounded-lg border-2 border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none resize-y transition-colors">${text}</textarea>
+                        <div class="byte-count text-right text-slate-500 mt-2 font-medium">${byteSize} bytes</div>
+                    </div>
+                `;
+
+                container.appendChild(block);
+
+                // 이벤트 리스너 연결
+                const titleInput = block.querySelector(".title-input");
+                const textArea = block.querySelector(".text-area");
+                const byteCount = block.querySelector(".byte-count");
+                const collapseButton = block.querySelector(".collapse-button");
+                const deleteButton = block.querySelector(".delete-button");
+                const statusButtons = block.querySelectorAll(".status-button");
+
+                titleInput.addEventListener("input", saveBlocksToLocalStorage);
+                textArea.addEventListener("input", () => {
+                    byteCount.textContent = new Blob([textArea.value]).size + " bytes";
+                    saveBlocksToLocalStorage();
+                });
+
+                collapseButton.addEventListener("click", () => {
+                    block.classList.toggle("collapsed");
+                    block.querySelector('.content-wrapper').classList.toggle('max-h-0');
+                    block.querySelector('.content-wrapper').classList.toggle('max-h-screen');
+                    block.querySelector('.collapse-button svg').classList.toggle('rotate-180');
+                    saveBlocksToLocalStorage();
+                });
+
+                deleteButton.addEventListener("click", () => {
+                    blockToDelete = block;
+                    deleteModal.classList.remove('hidden');
+                });
+                
+                statusButtons.forEach(button => {
+                    button.addEventListener("click", () => {
+                        block.dataset.status = button.dataset.status;
+                        saveBlocksToLocalStorage();
+                    });
+                });
+
+                if (shouldScroll) {
+                    block.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                updateIndex();
+            }
+
+            // 인덱스 업데이트
+            function updateIndex() {
+                indexListEl.innerHTML = '';
+                document.querySelectorAll(".block").forEach(block => {
+                    const title = block.querySelector(".title-input").value.trim();
+                    if (title) {
+                        const status = block.dataset.status;
+                        const item = document.createElement("div");
+                        item.className = "index-item text-sm font-semibold py-2 px-4 rounded-full cursor-pointer hover:scale-105 transition-transform";
+                        item.dataset.status = status;
+                        item.textContent = title;
+                        item.addEventListener('click', () => {
+                            block.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            block.classList.remove('collapsed');
+                            block.querySelector('.content-wrapper').classList.remove('max-h-0');
+                            block.querySelector('.content-wrapper').classList.add('max-h-screen');
+                            block.querySelector('.collapse-button svg').classList.remove('rotate-180');
+                        });
+                        indexListEl.appendChild(item);
+                    }
+                });
+            }
+
+            // 데이터 다운로드
+            function downloadData() {
+                const dataStr = JSON.stringify(gradeData, null, 2); // 보기 좋게 포맷팅
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `setuk_backup_${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            // 데이터 업로드
+            function uploadData(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        // 데이터 유효성 검사 (간단하게)
+                        if (data['1'] && data['2'] && data['3']) {
+                            Object.assign(gradeData, data);
+                            loadGradeBlocks(currentGrade);
+                            saveBlocksToLocalStorage();
+                            alert('백업 데이터 복원에 성공했습니다.');
+                        } else {
+                            alert('유효하지 않은 백업 파일입니다.');
+                        }
+                    } catch (error) {
+                        alert('파일을 읽는 중 오류가 발생했습니다.');
+                        console.error("Upload error:", error);
+                    }
+                };
+                reader.readAsText(file);
+                event.target.value = ''; // 같은 파일 다시 올릴 수 있도록 초기화
+            }
+
+            // --- 이벤트 리스너 설정 ---
+
+            // 탭 버튼
+            document.querySelectorAll(".tab-button").forEach(button => {
+                button.addEventListener("click", () => {
+                    currentGrade = button.dataset.grade;
+                    updateActiveTab();
+                    loadGradeBlocks(currentGrade);
+                    localStorage.setItem("lastGrade", currentGrade);
                 });
             });
-            gradeData[currentGrade] = blocks;
-            localStorage.setItem("gradeData", JSON.stringify(gradeData));
-            localStorage.setItem("lastGrade", currentGrade);
-            showSaveStatus('저장 완료!');
-            updateIndex();
-        }
 
-        function loadBlocksFromLocalStorage() {
-            const data = localStorage.getItem("gradeData");
-            if (data) {
-                Object.assign(gradeData, JSON.parse(data));
-                loadGradeBlocks(currentGrade);
-            }
-            const lastGrade = localStorage.getItem("lastGrade");
-            if (lastGrade) {
-                currentGrade = lastGrade;
-                document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
-                document.querySelector(`.tab-button[data-grade="${currentGrade}"]`).classList.add("active");
-                loadGradeBlocks(currentGrade);
-            }
-        }
+            // 스크롤 버튼
+            document.getElementById('scrollTop').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+            document.getElementById('scrollBottom').addEventListener('click', () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }));
 
-        function loadGradeBlocks(grade) {
-            const container = document.getElementById("container");
-            container.innerHTML = '';
-            gradeData[grade].forEach(data => addBlock(data.title, data.text, data.status, data.collapsed));
-            updateIndex();
-        }
+            // 기능 버튼
+            document.getElementById("addBlock").addEventListener("click", () => addBlock());
+            document.getElementById("indexShortcut").addEventListener("click", () => document.querySelector('.index-container').scrollIntoView({ behavior: 'smooth' }));
+            document.getElementById("downloadData").addEventListener("click", downloadData);
+            document.getElementById("uploadDataBtn").addEventListener("click", () => document.getElementById('fileInput').click());
+            document.getElementById('fileInput').addEventListener('change', uploadData);
 
-        function addBlock(title = "", text = "", status = "draft", collapsed = false) {
-            const block = document.createElement("div");
-            block.classList.add("block");
-            if (collapsed) block.classList.add("collapsed");
-            block.dataset.status = status;
-
-            const header = document.createElement("div");
-            header.classList.add("block-header");
-
-            const titleInput = document.createElement("input");
-            titleInput.type = "text";
-            titleInput.placeholder = "과목명";
-            titleInput.classList.add("title-input");
-            titleInput.value = title;
-
-            const statusButtons = document.createElement("div");
-            statusButtons.classList.add("status-buttons");
-
-            const draftButton = document.createElement("button");
-            draftButton.classList.add("status-button", "draft");
-            draftButton.textContent = "초안";
-            draftButton.addEventListener("click", () => {
-                block.dataset.status = "draft";
-                saveBlocksToLocalStorage();
-            });
-
-            const inProgressButton = document.createElement("button");
-            inProgressButton.classList.add("status-button", "in-progress");
-            inProgressButton.textContent = "수정중";
-            inProgressButton.addEventListener("click", () => {
-                block.dataset.status = "in-progress";
-                saveBlocksToLocalStorage();
-            });
-
-            const completedButton = document.createElement("button");
-            completedButton.classList.add("status-button", "completed");
-            completedButton.textContent = "완료";
-            completedButton.addEventListener("click", () => {
-                block.dataset.status = "completed";
-                saveBlocksToLocalStorage();
-            });
-
-            statusButtons.appendChild(draftButton);
-            statusButtons.appendChild(inProgressButton);
-            statusButtons.appendChild(completedButton);
-
-            const actions = document.createElement("div");
-            actions.classList.add("block-actions");
-
-            const collapseButton = document.createElement("button");
-            collapseButton.classList.add("collapse-button");
-            collapseButton.textContent = block.classList.contains('collapsed') ? "펼치기" : "접기";
-            collapseButton.addEventListener("click", () => {
-                block.classList.toggle("collapsed");
-                collapseButton.textContent = block.classList.contains('collapsed') ? "펼치기" : "접기";
-                saveBlocksToLocalStorage();
-            });
-
-            const deleteButton = document.createElement("button");
-            deleteButton.classList.add("delete-button");
-            deleteButton.textContent = "삭제";
-            deleteButton.addEventListener("click", () => {
-                if (confirm("정말 삭제하시겠습니까?")) {
-                    block.remove();
+            // 삭제 모달
+            confirmDeleteBtn.addEventListener('click', () => {
+                if (blockToDelete) {
+                    blockToDelete.remove();
                     saveBlocksToLocalStorage();
                 }
+                deleteModal.classList.add('hidden');
+                blockToDelete = null;
+            });
+            cancelDeleteBtn.addEventListener('click', () => {
+                deleteModal.classList.add('hidden');
+                blockToDelete = null;
             });
 
-            actions.appendChild(collapseButton);
-            actions.appendChild(deleteButton);
-
-            const textArea = document.createElement("textarea");
-            textArea.placeholder = "세특 내용";
-            textArea.classList.add("text-area");
-            textArea.value = text;
-
-            const byteCount = document.createElement("div");
-            byteCount.classList.add("byte-count");
-            byteCount.textContent = new Blob([text]).size + " bytes";
-
-            textArea.addEventListener("input", () => {
-                byteCount.textContent = new Blob([textArea.value]).size + " bytes";
-                saveBlocksToLocalStorage();
-            });
-
-            titleInput.addEventListener("input", saveBlocksToLocalStorage);
-
-            header.appendChild(titleInput);
-            header.appendChild(statusButtons);
-
-            block.appendChild(actions);
-            block.appendChild(header);
-            block.appendChild(textArea);
-            block.appendChild(byteCount);
-            
-            document.getElementById("container").appendChild(block);
-            block.scrollIntoView({ behavior: 'smooth', block: 'end' });
-            updateIndex();
-        }
-
-        function createIndexItem(title, status) {
-            const item = document.createElement("div");
-            item.classList.add("index-item");
-            item.dataset.status = status;
-            item.textContent = title;
-            item.addEventListener('click', () => {
-                const targetBlock = Array.from(document.querySelectorAll('.title-input'))
-                    .find(input => input.value === title)
-                    ?.closest('.block');
-                if (targetBlock) {
-                    targetBlock.scrollIntoView({ behavior: 'smooth' });
-                }
-            });
-            return item;
-        }
-
-        function updateIndex() {
-            const indexList = document.getElementById("indexList");
-            indexList.innerHTML = '';
-            document.querySelectorAll(".block").forEach(block => {
-                const title = block.querySelector(".title-input").value.trim();
-                if (title) {
-                    const status = block.dataset.status;
-                    indexList.appendChild(createIndexItem(title, status));
-                }
-            });
-        }
-
-        document.getElementById("addBlock").addEventListener("click", () => addBlock());
-        document.getElementById("downloadData").addEventListener("click", downloadData);
-        document.getElementById("uploadData").addEventListener("click", () => document.getElementById('fileInput').click());
-        document.getElementById("indexShortcut").addEventListener("click", () => {
-            document.querySelector('.index-container').scrollIntoView({ behavior: 'smooth' });
-        });
-
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.id = 'fileInput';
-        fileInput.style.display = 'none';
-        fileInput.addEventListener('change', uploadData);
-        document.body.appendChild(fileInput);
-
-        document.querySelectorAll(".tab-button").forEach(button => {
-            button.addEventListener("click", () => {
-                document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
-                button.classList.add("active");
-                currentGrade = button.dataset.grade;
-                loadGradeBlocks(currentGrade);
-            });
-        });
-
-        window.onload = () => {
-            loadBlocksFromLocalStorage();
-        };
-
-        function downloadData() {
-            const dataStr = JSON.stringify(gradeData);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(dataBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'gradeData.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        function uploadData(event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = JSON.parse(e.target.result);
-                Object.assign(gradeData, data);
-                loadGradeBlocks(currentGrade);
-                saveBlocksToLocalStorage();
-            };
-            reader.readAsText(file);
-        }
-        const selectionInfo = document.getElementById('selectionInfo');
-        document.addEventListener('selectionchange', () => {
-            const selection = window.getSelection();
-            if (selection.rangeCount > 0) {
-                const selectedText = selection.toString();
-                if (selectedText) {
+            // 선택된 텍스트 바이트 계산
+            document.addEventListener('selectionchange', () => {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                    const selectedText = selection.toString();
                     const charCount = new Blob([selectedText]).size;
-                    selectionInfo.textContent = `선택한 글자 바이트 수: ${charCount}`;
-                } else {
-                    selectionInfo.textContent = '선택한 글자 바이트 수: 0';
+                    selectionInfoEl.textContent = `선택한 글자 바이트 수: ${charCount}`;
                 }
-            }
+            });
+
+            // --- 초기화 ---
+            loadBlocksFromLocalStorage();
         });
     </script>
 </body>
+</html>
