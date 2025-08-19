@@ -4,7 +4,8 @@
 
 이전 버전: kimsj5025.github.io/setuksaver/  
 
-*본 서비스는 **KimCastleOwner(GPX Space)**의 서비스 기반이며, 2026학년도 수능 이후 개발 예정입니다.
+💡 본 서비스는 **KimCastleOwner(GPX Space)**의 서비스 기반이며, 2026학년도 수능 이후 개발 예정입니다.
+
 ---
 
 ## ✨ 핵심 기능
